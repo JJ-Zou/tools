@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>文件列表</title>
+</head>
+<body>
+
+<form th:action="@{/file/upload}" method="post" enctype="multipart/form-data">
+    <input type="file" name="file"/>
+    <input type="submit" value="上传文件">
+</form>
+
+<div th:each="file:${file_list.getList()}">
+    <a th:href="@{/file/download?file_id={id}(id=${file.fileId})}">
+        <span th:text="${file.fileName}"></span>
+    </a>
+    <span th:text="|${file.size}B|"></span>
+</div>
+
+</body>
+</html>

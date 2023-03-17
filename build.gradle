@@ -1,0 +1,51 @@
+plugins {
+    id 'java'
+    id("org.springframework.boot") version "2.2.5.RELEASE"
+    id("io.spring.dependency-management") version "1.0.9.RELEASE"
+}
+
+group = 'com.zjj'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    maven {
+//        allowInsecureProtocol = true
+        url 'https://maven.aliyun.com/repository/central'
+    }
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis:2.2.5.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf:2.2.5.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-starter-web:2.2.5.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-starter-aop:2.2.5.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator:2.2.5.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-starter-mail:2.2.5.RELEASE'
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.2'
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    implementation 'com.github.pagehelper:pagehelper-spring-boot-starter:1.3.0'
+    implementation 'org.mybatis.generator:mybatis-generator-core:1.3.5'
+//    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    runtimeOnly 'mysql:mysql-connector-java:5.1.47'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.2.5.RELEASE'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+jar {
+    archiveFileName = "file_server.jar"
+    manifest {
+        attributes 'Main-Class': 'com.zjj.fileserver.FileServerApplication'
+    }
+}
