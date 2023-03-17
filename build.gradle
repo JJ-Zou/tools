@@ -44,8 +44,8 @@ tasks.named('test') {
 }
 
 jar {
-    archiveFileName = "file_server.jar"
+    archiveFileName = "tools.jar"
     manifest {
-        attributes 'Main-Class': 'com.zjj.fileserver.FileServerApplication'
+        attributes 'Main-Class': 'com.zjj.ToolsApplication'
     }
 }

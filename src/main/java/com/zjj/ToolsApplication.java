@@ -6,11 +6,11 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 @EnableAsync
 @SpringBootApplication
-public class FileServerApplication {
+public class ToolsApplication {
 
 
     public static void main(String[] args) {
-        SpringApplication.run(FileServerApplication.class, args);
+        SpringApplication.run(ToolsApplication.class, args);
     }
 
 }

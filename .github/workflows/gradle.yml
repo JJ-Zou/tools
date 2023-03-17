@@ -9,11 +9,11 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main" ]
 
 env:
   REGISTRY: docker.io
-  IMAGE_NAME: file_server
+  IMAGE_NAME: tools
   IMAGE_TAG: ${{ github.sha }}
   REDIS_HOST: ${{ secrets.REDIS_HOST }}
   MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
