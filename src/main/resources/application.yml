@@ -28,6 +28,10 @@ spring:
             required: true
       from: ${MAIL_USERNAME}
       to: ${TO_MAIL}
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
 
 mybatis:
   configuration:

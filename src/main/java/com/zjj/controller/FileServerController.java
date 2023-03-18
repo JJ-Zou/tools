@@ -11,10 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.DigestUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
@@ -29,18 +26,18 @@ public class FileServerController {
     private FileService fileService;
 
     @GetMapping("/list")
-    public String listFileInfos(@RequestParam(name = "offset", defaultValue = "1") int offset,
-                                @RequestParam(name = "limit", defaultValue = "10") int limit,
+    public String listFileInfos(@RequestParam(name = "pageNum", defaultValue = "1") int pageNum,
+                                @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                 Model model) {
-        PageInfo<FileInfo> pageInfo = fileService.listFileInfo(offset, limit);
+        PageInfo<FileInfo> pageInfo = fileService.listFileInfo(pageNum, pageSize);
         model.addAttribute("file_list", pageInfo);
         return "list";
     }
 
     @GetMapping("/page")
-    public ResponseEntity<?> pageFileInfos(@RequestParam(name = "offset", defaultValue = "1") int offset,
-                                           @RequestParam(name = "limit", defaultValue = "10") int limit) {
-        PageInfo<FileInfo> pageInfo = fileService.listFileInfo(offset, limit);
+    public ResponseEntity<?> pageFileInfos(@RequestParam(name = "pageNum", defaultValue = "1") int pageNum,
+                                           @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        PageInfo<FileInfo> pageInfo = fileService.listFileInfo(pageNum, pageSize);
         return ResponseEntity.ok(pageInfo);
     }
 
@@ -53,6 +50,12 @@ public class FileServerController {
         return ResponseEntity.ok(fileInfo);
     }
 
+    @DeleteMapping
+    public ResponseEntity<?> deleteFile(@RequestParam(name = "file_id") long fileId) {
+        fileService.deleteByFileId(fileId);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/upload")
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile uploadFile) {
         String filename = uploadFile.getOriginalFilename();
@@ -63,9 +66,8 @@ public class FileServerController {
             return ResponseEntity.badRequest().build();
         }
         long size = uploadFile.getSize();
-        String type = "file";
         String md5 = DigestUtils.md5DigestAsHex(content);
-        Long fileId = fileService.createNewFile(filename, type, content, size, md5);
+        Long fileId = fileService.createNewFile(filename, content, size, md5);
         return ResponseEntity.ok(fileId);
     }
 
@@ -78,13 +80,11 @@ public class FileServerController {
         String filename = fileInfo.getFileName();
         long size = fileInfo.getSize();
         String content = fileInfo.getContent();
-        //设置响应头
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
         headers.add("Content-Disposition", String.format("attachment; filename=\"%s\"", filename));
         headers.add("Pragma", "no-cache");
         headers.add("Expires", "0");
-
         return ResponseEntity
                 .ok()
                 .headers(headers)

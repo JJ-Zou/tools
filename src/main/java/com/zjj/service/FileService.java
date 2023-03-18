@@ -9,8 +9,10 @@ public interface FileService {
 
     FileInfo selectByFileId(long fileId);
 
+    void deleteByFileId(long fileId);
+
     FileInfo selectWithContentByFileId(long fileId);
 
-    Long createNewFile(String filename, String type, byte[] content, long size, String md5);
+    Long createNewFile(String filename, byte[] content, long size, String md5);
 
 }

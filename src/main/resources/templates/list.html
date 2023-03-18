@@ -1,22 +1,79 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+
 <head>
     <meta charset="UTF-8">
     <title>文件列表</title>
 </head>
 <body>
 
+<br>
+<br>
+<br>
+<br>
+<br>
+
+<div class="f_list" th:each="file:${file_list.getList()}">
+    <a th:href="@{/file/download?file_id={id}(id=${file.fileId})}">
+        <span th:text="${file.fileName}"></span>
+    </a>
+    &nbsp&nbsp
+    <form method="post" th:action="@{/file/download?file_id={id}(id=${file.fileId})}" style="display: inline">
+        <button name="download_file" value="下载">下载</button>
+    </form>
+
+    <form id="delete_file_form" method="post" th:action="@{/file?file_id={id}(id=${file.fileId})}" style="display: inline">
+        <input type="hidden" name="_method" value="delete">
+        <button class="delete_file_button" name="delete_file" value="删除">删除</button>
+    </form>
+
+    <span th:text="|${file.size}B|"></span>
+</div>
+
+<br>
+<br>
+
+<div class="f_page">
+
+    <!-- 首页 -->
+    <span>
+            <a th:href="|/file/list?pageNum=${file_list.getNavigateFirstPage()}|">首页</a>
+        </span>
+
+    <!-- 上一页 -->
+    <span th:if="${file_list.isHasPreviousPage()}">
+            <a th:href="|/file/list?pageNum=${file_list.getPrePage()}|" th:text="上一页"></a>
+        </span>
+
+    <!-- 中间页 -->
+    <span th:each="pageNum:${file_list.getNavigatepageNums()}">
+            <a th:href="|/file/list?pageNum=${pageNum}|" th:text="${pageNum}"
+               th:if="${pageNum ne file_list.getPageNum()}"></a>
+            <a th:href="|/file/list?pageNum=${pageNum}|" th:text="${pageNum}"
+               th:if="${pageNum eq file_list.getPageNum()}"
+               th:style="'font-weight:bold;background: #6faed9;'"></a>
+        </span>
+
+    <!-- 下一页 -->
+    <span th:if="${file_list.isHasNextPage()}">
+            <a th:href="|/file/list?pageNum=${file_list.getNextPage()}|" th:text="下一页"></a>
+        </span>
+
+    <!-- 尾页 -->
+    <span>
+            <a th:href="|/file/list?pageNum=${file_list.getNavigateLastPage()}|">尾页</a>
+        </span>
+</div>
+
+<br>
+<br>
+<br>
+<br>
+
 <form enctype="multipart/form-data" method="post" th:action="@{/file/upload}">
     <input name="file" type="file"/>
     <input type="submit" value="上传文件">
 </form>
-
-<div th:each="file:${file_list.getList()}">
-    <a th:href="@{/file/download?file_id={id}(id=${file.fileId})}">
-        <span th:text="${file.fileName}"></span>
-    </a>
-    <span th:text="|${file.size}B|"></span>
-</div>
 
 </body>
 </html>
