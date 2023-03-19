@@ -18,7 +18,7 @@ public class FileUtil {
         if (osName.toUpperCase().startsWith("Windows".toUpperCase())) {
             rootPath = "./";
         } else {
-            rootPath = "~/tools/file/";
+            rootPath = "/home/tools/file/";
         }
         Path path = Paths.get(rootPath);
         if (Files.notExists(path)) {
