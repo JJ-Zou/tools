@@ -14,9 +14,12 @@ import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -79,17 +82,21 @@ public class FileServerController {
     }
 
     @RequestMapping("/download")
-    public ResponseEntity<?> downloadFile(@RequestParam(name = "file_id") long fileId) {
-        FileInfo fileInfo = fileService.selectWithContentByFileId(fileId);
+    public ResponseEntity<?> downloadFile(@RequestParam(name = "file_id") long fileId) throws IOException {
+        FileInfo fileInfo = fileService.selectByFileId(fileId);
         if (fileInfo == null) {
             return ResponseEntity.badRequest().build();
         }
         String filename = fileInfo.getFileName();
+        String md5 = fileInfo.getMd5();
         long size = fileInfo.getSize();
-        String content = fileInfo.getContent();
+        String path = fileInfo.getPath();
+        Path filePath = Paths.get(path);
         HttpHeaders headers = new HttpHeaders();
+        String encodeFilename = URLEncoder.encode(filename, StandardCharsets.UTF_8);
         headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
-        headers.add("Content-Disposition", String.format("attachment; filename=\"%s\"", filename));
+        headers.add("Content-Disposition",
+                String.format("attachment; filename=%s;filename*=utf-8''%s", encodeFilename, encodeFilename));
         headers.add("Pragma", "no-cache");
         headers.add("Expires", "0");
         return ResponseEntity
@@ -97,7 +104,7 @@ public class FileServerController {
                 .headers(headers)
                 .contentLength(size)
                 .contentType(MediaType.parseMediaType("application/octet-stream"))
-                .body(new InputStreamResource(new ByteArrayInputStream(content.getBytes(StandardCharsets.ISO_8859_1))));
+                .body(new InputStreamResource(Files.newInputStream(filePath)));
     }
 
 }

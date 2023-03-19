@@ -18,12 +18,13 @@
         <span th:text="${file.fileName}"></span>
     </a>
     &nbsp&nbsp
-    <form method="post" th:action="@{/file/download?file_id={id}(id=${file.fileId})}" style="display: inline">
+    <form method="post" style="display: inline" th:action="@{/file/download?file_id={id}(id=${file.fileId})}">
         <button name="download_file" value="下载">下载</button>
     </form>
 
-    <form id="delete_file_form" method="post" th:action="@{/file?file_id={id}(id=${file.fileId})}" style="display: inline">
-        <input type="hidden" name="_method" value="delete">
+    <form id="delete_file_form" method="post" style="display: inline"
+          th:action="@{/file?file_id={id}(id=${file.fileId})}">
+        <input name="_method" type="hidden" value="delete">
         <button class="delete_file_button" name="delete_file" value="删除">删除</button>
     </form>
 
@@ -47,11 +48,11 @@
 
     <!-- 中间页 -->
     <span th:each="pageNum:${file_list.getNavigatepageNums()}">
-            <a th:href="|/file/list?pageNum=${pageNum}|" th:text="${pageNum}"
-               th:if="${pageNum ne file_list.getPageNum()}"></a>
-            <a th:href="|/file/list?pageNum=${pageNum}|" th:text="${pageNum}"
-               th:if="${pageNum eq file_list.getPageNum()}"
-               th:style="'font-weight:bold;background: #6faed9;'"></a>
+            <a th:href="|/file/list?pageNum=${pageNum}|" th:if="${pageNum ne file_list.getPageNum()}"
+               th:text="${pageNum}"></a>
+            <a th:href="|/file/list?pageNum=${pageNum}|" th:if="${pageNum eq file_list.getPageNum()}"
+               th:style="'font-weight:bold;background: #6faed9;'"
+               th:text="${pageNum}"></a>
         </span>
 
     <!-- 下一页 -->

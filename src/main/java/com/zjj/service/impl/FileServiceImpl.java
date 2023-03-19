@@ -19,7 +19,8 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.Future;
 
@@ -78,26 +79,29 @@ public class FileServiceImpl implements FileService {
     @Async("fileUploadPoolTaskExecutor")
     @Override
     public Future<Long> createNewFile(String filename, byte[] content, long size, String md5) {
-        String filePath;
+        Path filePath;
         try {
-            filePath = FileUtil.getUploadFilePath(filename);
+            filePath = FileUtil.getOrCreateUploadFilePath(filename, md5);
         } catch (IOException e) {
             e.printStackTrace();
             throw new IllegalStateException("get filePath error!");
         }
-        File file = new File(filePath);
-        try (FileOutputStream fileOutputStream = new FileOutputStream(file);) {
-            fileOutputStream.write(content);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new IllegalStateException("write to file error!");
+        if (Files.notExists(filePath)) {
+            File file = filePath.toFile();
+            try (FileOutputStream fileOutputStream = new FileOutputStream(file);) {
+                fileOutputStream.write(content);
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new IllegalStateException("write to file error!");
+            }
         }
         long fileId = GenerateIdUtil.generateId();
         FileInfo fileInfo = new FileInfo();
         fileInfo.setFileId(fileId);
         fileInfo.setFileName(filename);
         fileInfo.setType(FileInfoConstants.FileTypeEnum.FILE.getType());
-        fileInfo.setContent(new String(content, StandardCharsets.ISO_8859_1));
+        fileInfo.setPath(filePath.toString());
+//        fileInfo.setContent(new String(content, StandardCharsets.ISO_8859_1));
         fileInfo.setSize(size);
         fileInfo.setStatus(FileStatusEnum.ENABLE.getStatus());
         fileInfo.setMd5(md5);

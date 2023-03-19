@@ -7,8 +7,13 @@ import java.nio.file.Paths;
 
 public class FileUtil {
 
-    public static String getUploadFilePath(String filename) throws IOException {
-        return getOrCreateFileRootPath() + filename;
+    public static Path getOrCreateUploadFilePath(String filename, String md5) throws IOException {
+        String dir = getOrCreateFileRootPath() + md5;
+        Path path = Paths.get(dir);
+        if (Files.notExists(path)) {
+            Files.createDirectories(path);
+        }
+        return Paths.get(dir + "/" + filename);
     }
 
 
