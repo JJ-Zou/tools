@@ -90,6 +90,7 @@ public class FileServiceImpl implements FileService {
             fileOutputStream.write(content);
         } catch (IOException e) {
             e.printStackTrace();
+            throw new IllegalStateException("write to file error!");
         }
         long fileId = GenerateIdUtil.generateId();
         FileInfo fileInfo = new FileInfo();
