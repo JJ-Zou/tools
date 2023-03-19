@@ -3,6 +3,8 @@ package com.zjj.service;
 import com.github.pagehelper.PageInfo;
 import com.zjj.entity.FileInfo;
 
+import java.util.concurrent.Future;
+
 public interface FileService {
 
     PageInfo<FileInfo> listFileInfo(int offset, int limit);
@@ -13,6 +15,6 @@ public interface FileService {
 
     FileInfo selectWithContentByFileId(long fileId);
 
-    Long createNewFile(String filename, byte[] content, long size, String md5);
+    Future<Long> createNewFile(String filename, byte[] content, long size, String md5);
 
 }

@@ -17,6 +17,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 @Controller
 @RequestMapping("/file")
@@ -57,7 +59,8 @@ public class FileServerController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile uploadFile) {
+    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile uploadFile,
+                                        @RequestParam(value = "sync", defaultValue = "False") boolean sync) throws ExecutionException, InterruptedException {
         String filename = uploadFile.getOriginalFilename();
         byte[] content;
         try {
@@ -67,8 +70,12 @@ public class FileServerController {
         }
         long size = uploadFile.getSize();
         String md5 = DigestUtils.md5DigestAsHex(content);
-        Long fileId = fileService.createNewFile(filename, content, size, md5);
-        return ResponseEntity.ok(fileId);
+        Future<Long> fileIdFuture = fileService.createNewFile(filename, content, size, md5);
+        if (sync) {
+            Long fileId = fileIdFuture.get();
+            return ResponseEntity.ok(fileId);
+        }
+        return ResponseEntity.ok().build();
     }
 
     @RequestMapping("/download")

@@ -8,13 +8,22 @@ import com.zjj.entity.FileInfo;
 import com.zjj.entity.FileInfoExample;
 import com.zjj.mapper.FileInfoMapper;
 import com.zjj.service.FileService;
+import com.zjj.utils.FileUtil;
 import com.zjj.utils.GenerateIdUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.concurrent.Future;
 
+@Slf4j
 @Service
 public class FileServiceImpl implements FileService {
 
@@ -25,6 +34,7 @@ public class FileServiceImpl implements FileService {
     public PageInfo<FileInfo> listFileInfo(int offset, int limit) {
         FileInfoExample example = new FileInfoExample();
         example.createCriteria().andStatusEqualTo(FileStatusEnum.ENABLE.getStatus());
+        example.setOrderByClause("created_at desc");
         PageHelper.startPage(offset, limit);
         List<FileInfo> allFileInfos = fileInfoMapper.selectByExample(example);
         return new PageInfo<>(allFileInfos);
@@ -65,8 +75,22 @@ public class FileServiceImpl implements FileService {
         return fileInfoList.get(0);
     }
 
+    @Async("fileUploadPoolTaskExecutor")
     @Override
-    public Long createNewFile(String filename, byte[] content, long size, String md5) {
+    public Future<Long> createNewFile(String filename, byte[] content, long size, String md5) {
+        String filePath;
+        try {
+            filePath = FileUtil.getUploadFilePath(filename);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("get filePath error!");
+        }
+        File file = new File(filePath);
+        try (FileOutputStream fileOutputStream = new FileOutputStream(file);) {
+            fileOutputStream.write(content);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         long fileId = GenerateIdUtil.generateId();
         FileInfo fileInfo = new FileInfo();
         fileInfo.setFileId(fileId);
@@ -80,6 +104,7 @@ public class FileServiceImpl implements FileService {
         if (row != 1) {
             throw new IllegalStateException("create file error!");
         }
-        return fileId;
+        log.info("upload file {} success.", filename);
+        return AsyncResult.forValue(fileId);
     }
 }

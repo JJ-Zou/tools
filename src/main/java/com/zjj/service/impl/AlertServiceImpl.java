@@ -23,7 +23,7 @@ public class AlertServiceImpl implements AlertService {
     @Value("${spring.mail.properties.to}")
     private String to;
 
-    @Async("threadPoolTaskExecutor")
+    @Async("alertPoolTaskExecutor")
     @Override
     public void alert(String content) {
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
