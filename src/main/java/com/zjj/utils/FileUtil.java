@@ -16,13 +16,13 @@ public class FileUtil {
         String osName = System.getProperty("os.name");
         String rootPath = null;
         if (osName.toUpperCase().startsWith("Windows".toUpperCase())) {
-            rootPath = "c:/Users/tools/file/";
+            rootPath = "./";
         } else {
             rootPath = "~/tools/file/";
         }
         Path path = Paths.get(rootPath);
         if (Files.notExists(path)) {
-            Files.createDirectory(path);
+            Files.createDirectories(path);
         }
         return rootPath;
     }
