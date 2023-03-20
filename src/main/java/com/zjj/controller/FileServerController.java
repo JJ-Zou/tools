@@ -3,6 +3,7 @@ package com.zjj.controller;
 import com.github.pagehelper.PageInfo;
 import com.zjj.entity.FileInfo;
 import com.zjj.service.FileService;
+import com.zjj.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -90,8 +91,7 @@ public class FileServerController {
         String filename = fileInfo.getFileName();
         String md5 = fileInfo.getMd5();
         long size = fileInfo.getSize();
-        String path = fileInfo.getPath();
-        Path filePath = Paths.get(path);
+        Path filePath = FileUtil.getOrCreateUploadFilePath(filename, md5);
         HttpHeaders headers = new HttpHeaders();
         String encodeFilename = URLEncoder.encode(filename, StandardCharsets.UTF_8);
         headers.add("Cache-Control", "no-cache, no-store, must-revalidate");

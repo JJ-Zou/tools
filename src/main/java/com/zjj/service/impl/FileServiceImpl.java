@@ -79,15 +79,16 @@ public class FileServiceImpl implements FileService {
     @Async("fileUploadPoolTaskExecutor")
     @Override
     public Future<Long> createNewFile(String filename, byte[] content, long size, String md5) {
-        Path filePath;
+        String filePath = md5 + "/" + filename;
+        Path absoluteFilePath;
         try {
-            filePath = FileUtil.getOrCreateUploadFilePath(filename, md5);
+            absoluteFilePath = FileUtil.getOrCreateUploadFilePath(filename, md5);
         } catch (IOException e) {
             e.printStackTrace();
             throw new IllegalStateException("get filePath error!");
         }
-        if (Files.notExists(filePath)) {
-            File file = filePath.toFile();
+        if (Files.notExists(absoluteFilePath)) {
+            File file = absoluteFilePath.toFile();
             try (FileOutputStream fileOutputStream = new FileOutputStream(file);) {
                 fileOutputStream.write(content);
             } catch (IOException e) {
@@ -100,7 +101,7 @@ public class FileServiceImpl implements FileService {
         fileInfo.setFileId(fileId);
         fileInfo.setFileName(filename);
         fileInfo.setType(FileInfoConstants.FileTypeEnum.FILE.getType());
-        fileInfo.setPath(filePath.toString());
+        fileInfo.setPath(filePath);
 //        fileInfo.setContent(new String(content, StandardCharsets.ISO_8859_1));
         fileInfo.setSize(size);
         fileInfo.setStatus(FileStatusEnum.ENABLE.getStatus());
