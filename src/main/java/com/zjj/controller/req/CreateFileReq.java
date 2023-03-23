@@ -1,16 +1,11 @@
 package com.zjj.controller.req;
 
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.ModelAttribute;
 
 @Data
 public class CreateFileReq {
-    private long parentId;
+    private long parentId = 0;
 
     private String filename;
-
-    private String type;
-
-    private boolean sync;
-
 }

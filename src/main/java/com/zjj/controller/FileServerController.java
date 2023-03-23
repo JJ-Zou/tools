@@ -1,17 +1,20 @@
 package com.zjj.controller;
 
 import com.github.pagehelper.PageInfo;
+import com.zjj.controller.req.CreateFileReq;
 import com.zjj.entity.FileInfo;
 import com.zjj.service.FileService;
 import com.zjj.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.DigestUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,7 +23,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -32,18 +34,20 @@ public class FileServerController {
     private FileService fileService;
 
     @GetMapping("/list")
-    public String listFileInfos(@RequestParam(name = "pageNum", defaultValue = "1") int pageNum,
+    public String listFileInfos(@RequestParam(name = "parentId", defaultValue = "0") long parentId,
+                                @RequestParam(name = "pageNum", defaultValue = "1") int pageNum,
                                 @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
                                 Model model) {
-        PageInfo<FileInfo> pageInfo = fileService.listFileInfo(pageNum, pageSize);
+        PageInfo<FileInfo> pageInfo = fileService.listFileInfo(parentId, pageNum, pageSize);
         model.addAttribute("file_list", pageInfo);
         return "list";
     }
 
     @GetMapping("/page")
-    public ResponseEntity<?> pageFileInfos(@RequestParam(name = "pageNum", defaultValue = "1") int pageNum,
+    public ResponseEntity<?> pageFileInfos(@RequestParam(name = "parentId", defaultValue = "0") long parentId,
+                                           @RequestParam(name = "pageNum", defaultValue = "1") int pageNum,
                                            @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
-        PageInfo<FileInfo> pageInfo = fileService.listFileInfo(pageNum, pageSize);
+        PageInfo<FileInfo> pageInfo = fileService.listFileInfo(parentId, pageNum, pageSize);
         return ResponseEntity.ok(pageInfo);
     }
 
@@ -59,13 +63,23 @@ public class FileServerController {
     @DeleteMapping
     public ResponseEntity<?> deleteFile(@RequestParam(name = "file_id") long fileId) {
         fileService.deleteByFileId(fileId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body(fileId);
+    }
+
+    @PostMapping("/dir")
+    public ResponseEntity<?> createDir(CreateFileReq createFileReq) {
+        String filename = createFileReq.getFilename();
+        long parentId = createFileReq.getParentId();
+        long fileId = fileService.createNewDir(filename, parentId);
+        return ResponseEntity.ok().body(fileId);
     }
 
     @PostMapping("/upload")
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile uploadFile,
+                                        CreateFileReq req,
                                         @RequestParam(value = "sync", defaultValue = "False") boolean sync) throws ExecutionException, InterruptedException {
-        String filename = uploadFile.getOriginalFilename();
+        String filename = StringUtils.isEmpty(req.getFilename())
+                ? uploadFile.getOriginalFilename() : req.getFilename();
         byte[] content;
         try {
             content = uploadFile.getBytes();
@@ -74,12 +88,12 @@ public class FileServerController {
         }
         long size = uploadFile.getSize();
         String md5 = DigestUtils.md5DigestAsHex(content);
-        Future<Long> fileIdFuture = fileService.createNewFile(filename, content, size, md5);
+        Future<Long> fileIdFuture = fileService.createNewFile(filename, content, size, md5, req.getParentId());
         if (sync) {
             Long fileId = fileIdFuture.get();
             return ResponseEntity.ok(fileId);
         }
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body(HttpStatus.OK.getReasonPhrase());
     }
 
     @RequestMapping("/download")

@@ -32,9 +32,11 @@ public class FileServiceImpl implements FileService {
     private FileInfoMapper fileInfoMapper;
 
     @Override
-    public PageInfo<FileInfo> listFileInfo(int offset, int limit) {
+    public PageInfo<FileInfo> listFileInfo(long parentId, int offset, int limit) {
         FileInfoExample example = new FileInfoExample();
-        example.createCriteria().andStatusEqualTo(FileStatusEnum.ENABLE.getStatus());
+        example.createCriteria()
+                .andParentIdEqualTo(parentId)
+                .andStatusEqualTo(FileStatusEnum.ENABLE.getStatus());
         example.setOrderByClause("created_at desc");
         PageHelper.startPage(offset, limit);
         List<FileInfo> allFileInfos = fileInfoMapper.selectByExample(example);
@@ -78,7 +80,7 @@ public class FileServiceImpl implements FileService {
 
     @Async("fileUploadPoolTaskExecutor")
     @Override
-    public Future<Long> createNewFile(String filename, byte[] content, long size, String md5) {
+    public Future<Long> createNewFile(String filename, byte[] content, long size, String md5, long parentId) {
         String filePath = md5 + "/" + filename;
         Path absoluteFilePath;
         try {
@@ -106,11 +108,28 @@ public class FileServiceImpl implements FileService {
         fileInfo.setSize(size);
         fileInfo.setStatus(FileStatusEnum.ENABLE.getStatus());
         fileInfo.setMd5(md5);
+        fileInfo.setParentId(parentId);
         int row = fileInfoMapper.insertSelective(fileInfo);
         if (row != 1) {
             throw new IllegalStateException("create file error!");
         }
         log.info("upload file {} success.", filename);
         return AsyncResult.forValue(fileId);
+    }
+
+    @Override
+    public Long createNewDir(String filename, long parentId) {
+        long fileId = GenerateIdUtil.generateId();
+        FileInfo fileInfo = new FileInfo();
+        fileInfo.setFileId(fileId);
+        fileInfo.setFileName(filename);
+        fileInfo.setType(FileInfoConstants.FileTypeEnum.DIR.getType());
+        fileInfo.setStatus(FileStatusEnum.ENABLE.getStatus());
+        fileInfo.setParentId(parentId);
+        int row = fileInfoMapper.insertSelective(fileInfo);
+        if (row != 1) {
+            throw new IllegalStateException("create file error!");
+        }
+        return fileId;
     }
 }

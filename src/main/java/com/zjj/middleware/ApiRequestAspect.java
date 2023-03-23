@@ -35,6 +35,7 @@ public class ApiRequestAspect {
                     Arrays.toString(joinPoint.getArgs()), result, end - start);
             return result;
         } catch (Throwable e) {
+            e.printStackTrace();
             final long end = System.currentTimeMillis();
             log.error("\"method: [{}] execute fail, args: {}, exception: [{}], consume {} ms.", joinPoint.getSignature().getName(),
                     Arrays.toString(joinPoint.getArgs()), e, end - start);

@@ -7,7 +7,7 @@ import java.util.concurrent.Future;
 
 public interface FileService {
 
-    PageInfo<FileInfo> listFileInfo(int offset, int limit);
+    PageInfo<FileInfo> listFileInfo(long parentId, int offset, int limit);
 
     FileInfo selectByFileId(long fileId);
 
@@ -15,6 +15,8 @@ public interface FileService {
 
     FileInfo selectWithContentByFileId(long fileId);
 
-    Future<Long> createNewFile(String filename, byte[] content, long size, String md5);
+    Future<Long> createNewFile(String filename, byte[] content, long size, String md5, long parentId);
+
+    Long createNewDir(String filename, long parentId);
 
 }
