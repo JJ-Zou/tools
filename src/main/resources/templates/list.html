@@ -6,87 +6,98 @@
     <title>文件列表</title>
 </head>
 <body>
+<div th:with="curParentId=${param.parentId != null ? param.parentId : 0}">
 
-<br>
-<br>
-<br>
-<br>
-<br>
-
-<form id="create_dir_form" method="post" style="display: inline"
-      th:action="@{/file/dir}">
-    <input type="text" name="filename">
-    <!--    <input type="text" name="filename">-->
-    <input type="submit" value="创建文件夹">
-</form>
-
-<div class="f_list" th:each="file:${file_list.getList()}">
-    <a th:href="@{/file(file_id=${file.fileId})}">
-        <span th:text="${file.fileName}"></span>
+    <a th:if="${curParentId} ne 0" th:href="@{/file/list(parentId=0, pageNum=1)}">
+        <button name="index_list" value="返回首页">返回首页</button>
     </a>
-    &nbsp&nbsp
-    <form method="post" style="display: inline" th:if="${file.type} eq 'file'"
-          th:action="@{/file/download?file_id={id}(id=${file.fileId})}">
-        <button name="download_file" value="下载">下载</button>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+
+    <form id="create_dir_form" method="post" style="display: inline"
+          th:action="@{/file/dir}">
+        <label>
+            <input type="text" name="filename">
+        </label>
+        <input type="hidden" th:value="${curParentId}" name="parentId">
+        <input type="submit" value="创建文件夹">
     </form>
 
-    <a th:if="${file.type} eq 'dir'" th:href="|/file/list?parentId=${file.fileId}|">
-        <button name="open_dir" value="打开">打开</button>
-    </a>
+    <br>
+    <br>
 
-    <form id="delete_file_form" method="post" style="display: inline"
-          th:action="@{/file(file_id=${file.fileId})}">
-        <input name="_method" type="hidden" value="delete">
-        <button class="delete_file_button" name="delete_file" value="删除">删除</button>
-    </form>
+    <div class="f_list" th:each="file:${file_list.getList()}">
+        <a th:href="@{/file(file_id=${file.fileId})}">
+            <span th:text="${file.fileName}"></span>
+        </a>
+        &nbsp&nbsp
+        <form method="post" style="display: inline" th:if="${file.type} eq 'file'"
+              th:action="@{/file/download(file_id=${file.fileId})}">
+            <button name="download_file" value="下载">下载</button>
+        </form>
 
-    <span th:text="|${file.size}B|"></span>
-</div>
+        <a th:if="${file.type} eq 'dir'" th:href="@{/file/list(parentId=${file.fileId}, pageNum=1)}">
+            <button name="open_dir" value="打开">打开</button>
+        </a>
 
-<br>
-<br>
+        <form id="delete_file_form" method="post" style="display: inline"
+              th:action="@{/file(file_id=${file.fileId})}">
+            <input name="_method" type="hidden" value="delete">
+            <button class="delete_file_button" name="delete_file" value="删除">删除</button>
+        </form>
 
-<div class="f_page">
+        <span th:text="|${file.size}B|"></span>
+    </div>
 
-    <!-- 首页 -->
-    <span th:unless="${file_list.isIsFirstPage()}">
-            <a th:href="@{/file/list(pageNum=${file_list.getNavigateFirstPage()})}">首页</a>
+    <br>
+    <br>
+
+    <div class="f_page">
+
+        <!-- 首页 -->
+        <span th:unless="${file_list.isIsFirstPage()}">
+            <a th:href="@{/file/list(parentId=${curParentId}, pageNum=${file_list.getNavigateFirstPage()})}">首页</a>
         </span>
 
-    <!-- 上一页 -->
-    <span th:if="${file_list.isHasPreviousPage()}">
-            <a th:href="@{/file/list(pageNum=${file_list.getPrePage()})}" th:text="上一页"></a>
+        <!-- 上一页 -->
+        <span th:if="${file_list.isHasPreviousPage()}">
+            <a th:href="@{/file/list(parentId=${curParentId}, pageNum=${file_list.getPrePage()})}" th:text="上一页"></a>
         </span>
 
-    <!-- 中间页 -->
-    <span th:each="pageNum:${file_list.getNavigatepageNums()}">
-            <a th:href="@{/file/list(parentId=${param.parentId}, pageNum=${pageNum})}" th:if="${pageNum ne file_list.getPageNum()}"
+        <!-- 中间页 -->
+        <span th:each="pageNum:${file_list.getNavigatepageNums()}">
+            <a th:href="@{/file/list(parentId=${curParentId}, pageNum=${pageNum})}"
+               th:if="${pageNum ne file_list.getPageNum()}"
                th:text="${pageNum}"></a>
-            <a th:href="@{/file/list(parentId=${param.parentId}, pageNum=${pageNum})}" th:if="${pageNum eq file_list.getPageNum()}"
+            <a th:href="@{/file/list(parentId=${curParentId}, pageNum=${pageNum})}"
+               th:if="${pageNum eq file_list.getPageNum()}"
                th:style="'font-weight:bold;background: #6faed9;'"
                th:text="${pageNum}"></a>
         </span>
 
-    <!-- 下一页 -->
-    <span th:if="${file_list.isHasNextPage()}">
-            <a th:href="@{/file/list(pageNum=${file_list.getNextPage()})}" th:text="下一页"></a>
+        <!-- 下一页 -->
+        <span th:if="${file_list.isHasNextPage()}">
+            <a th:href="@{/file/list(parentId=${curParentId}, pageNum=${file_list.getNextPage()})}" th:text="下一页"></a>
         </span>
 
-    <!-- 尾页 -->
-    <span th:unless="${file_list.isIsLastPage()}">
-            <a th:href="@{/file/list(pageNum=${file_list.getNavigateLastPage()})}">尾页</a>
+        <!-- 尾页 -->
+        <span th:unless="${file_list.isIsLastPage()}">
+            <a th:href="@{/file/list(parentId=${curParentId}, pageNum=${file_list.getNavigateLastPage()})}">尾页</a>
         </span>
+    </div>
+
+    <br>
+    <br>
+    <br>
+    <br>
+
+    <form enctype="multipart/form-data" method="post" th:action="@{/file/upload(parentId=${curParentId})}">
+        <input name="file" type="file"/>
+        <input type="submit" value="上传文件">
+    </form>
 </div>
-
-<br>
-<br>
-<br>
-<br>
-
-<form enctype="multipart/form-data" method="post" th:action="@{/file/upload}">
-    <input name="file" type="file"/>
-    <input type="submit" value="上传文件">
-</form>
-
 </body>
 </html>

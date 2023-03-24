@@ -76,10 +76,9 @@ public class FileServerController {
 
     @PostMapping("/upload")
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile uploadFile,
-                                        CreateFileReq req,
+                                        @RequestParam(value = "parentId", defaultValue = "0") long parentId,
                                         @RequestParam(value = "sync", defaultValue = "False") boolean sync) throws ExecutionException, InterruptedException {
-        String filename = StringUtils.isEmpty(req.getFilename())
-                ? uploadFile.getOriginalFilename() : req.getFilename();
+        String filename = uploadFile.getOriginalFilename();
         byte[] content;
         try {
             content = uploadFile.getBytes();
@@ -88,7 +87,7 @@ public class FileServerController {
         }
         long size = uploadFile.getSize();
         String md5 = DigestUtils.md5DigestAsHex(content);
-        Future<Long> fileIdFuture = fileService.createNewFile(filename, content, size, md5, req.getParentId());
+        Future<Long> fileIdFuture = fileService.createNewFile(filename, content, size, md5, parentId);
         if (sync) {
             Long fileId = fileIdFuture.get();
             return ResponseEntity.ok(fileId);
