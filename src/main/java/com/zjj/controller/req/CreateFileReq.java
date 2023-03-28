@@ -1,7 +1,6 @@
 package com.zjj.controller.req;
 
 import lombok.Data;
-import org.springframework.web.bind.annotation.ModelAttribute;
 
 @Data
 public class CreateFileReq {

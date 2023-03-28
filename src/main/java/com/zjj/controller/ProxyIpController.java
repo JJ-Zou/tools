@@ -2,7 +2,6 @@ package com.zjj.controller;
 
 import com.zjj.middleware.ProxyPool;
 import com.zjj.model.ProxyIp;
-import com.zjj.scheduler.SpiderScheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +15,6 @@ public class ProxyIpController {
 
     @Autowired
     private ProxyPool proxyPool;
-
-    @Autowired
-    private SpiderScheduler spiderScheduler;
 
     @PostMapping
     public ResponseEntity<ProxyIp> popProxyIp() {
@@ -42,12 +38,6 @@ public class ProxyIpController {
     @GetMapping("/count")
     public ResponseEntity<Integer> countProxyIp() {
         return new ResponseEntity<>(proxyPool.size(), HttpStatus.OK);
-    }
-
-    @PostMapping("/trigger")
-    public ResponseEntity<?> trigger() {
-        spiderScheduler.ScheduleResolve();
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }
