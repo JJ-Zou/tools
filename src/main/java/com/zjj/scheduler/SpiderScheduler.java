@@ -37,6 +37,15 @@ public class SpiderScheduler implements ApplicationContextAware {
             log.info("代理池中还剩余 {} 个可用ip, skip resolve", proxyPool.size());
             return;
         }
+        startSpider();
+    }
+
+    @Scheduled(cron = "0 0 5 * * ?")
+    public void RefreshScheduleResolve() {
+        startSpider();
+    }
+
+    private void startSpider() {
         Map<String, SpiderService> beansOfType = applicationContext.getBeansOfType(SpiderService.class);
         for (SpiderService spiderService : beansOfType.values()) {
             taskScheduler.schedule(() -> {
