@@ -1,17 +1,26 @@
 package com.zjj.scheduler;
 
+import com.datarangers.collector.EventCollector;
+import com.datarangers.event.Header;
+import com.datarangers.event.HeaderV3;
 import com.zjj.middleware.ProxyPool;
 import com.zjj.service.SpiderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.net.Inet4Address;
+import java.net.UnknownHostException;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -20,6 +29,10 @@ public class SpiderScheduler implements ApplicationContextAware {
 
     @Autowired
     private TaskScheduler taskScheduler;
+
+    @Autowired()
+    @Qualifier("webEventCollector")
+    private EventCollector webEventCollector;
 
     @Autowired
     private ProxyPool proxyPool;
@@ -51,7 +64,19 @@ public class SpiderScheduler implements ApplicationContextAware {
             taskScheduler.schedule(() -> {
                 try {
                     spiderService.resolve();
-                } catch (InterruptedException e) {
+                    Header header = HeaderV3.Builder.getInstance()
+                            .setClientIp(Inet4Address.getLocalHost().getHostAddress())
+                            .setOsName(System.getProperty("os.name"))
+                            .setAppId(401595)
+                            .setUserUniqueId("zjj-system")
+                            .build();
+                    Map<String, Object> eventParams = new HashMap<>();
+                    eventParams.put("current_time", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss")));
+                    eventParams.put("caller", "taskScheduler");
+                    webEventCollector.sendEvent(header, "refresh_schedule_resolve", eventParams);
+                } catch (InterruptedException | UnknownHostException e) {
+                    e.printStackTrace();
+                } catch (Throwable e) {
                     e.printStackTrace();
                 }
             }, Instant.now());
