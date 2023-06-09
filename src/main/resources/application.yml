@@ -45,6 +45,7 @@ datarangers:
   sdk:
     env: saas
     mode: http
-    domain: https://mcs.ctobsnssdk.com
-    appKeys: {401595: 80af5664642acd62abb2819900d7458a}
+    domain: ${DATARANGERS_DOMAIN}
+    appKeys:
+      401595: ${DATARANGERS_APP_AK}
 
