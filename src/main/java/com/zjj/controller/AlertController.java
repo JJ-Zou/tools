@@ -17,7 +17,7 @@ public class AlertController {
     private AlertService alertService;
 
     @PostMapping("/send")
-    public ResponseEntity<?> pageFileInfos(@RequestBody AlertMessageReq req) {
+    public ResponseEntity<?> sendAlert(@RequestBody AlertMessageReq req) {
         alertService.alert(req.getContent());
         return ResponseEntity.ok().build();
     }

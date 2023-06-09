@@ -68,11 +68,11 @@ public class SpiderScheduler implements ApplicationContextAware {
                             .setClientIp(Inet4Address.getLocalHost().getHostAddress())
                             .setOsName(System.getProperty("os.name"))
                             .setAppId(401595)
-                            .setUserUniqueId("zjj-system")
+                            .setUserUniqueId(Thread.currentThread().getName())
                             .build();
                     Map<String, Object> eventParams = new HashMap<>();
                     eventParams.put("current_time", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss")));
-                    eventParams.put("caller", "taskScheduler");
+                    eventParams.put("caller", taskScheduler.getClass().getName());
                     webEventCollector.sendEvent(header, "refresh_schedule_resolve", eventParams);
                 } catch (InterruptedException | UnknownHostException e) {
                     e.printStackTrace();
