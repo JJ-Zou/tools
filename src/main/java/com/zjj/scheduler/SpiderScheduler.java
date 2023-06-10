@@ -3,6 +3,7 @@ package com.zjj.scheduler;
 import com.datarangers.collector.EventCollector;
 import com.datarangers.event.Header;
 import com.datarangers.event.HeaderV3;
+import com.zjj.constants.DataRangersConstants;
 import com.zjj.middleware.ProxyPool;
 import com.zjj.service.SpiderService;
 import lombok.extern.slf4j.Slf4j;
@@ -67,12 +68,12 @@ public class SpiderScheduler implements ApplicationContextAware {
                     Header header = HeaderV3.Builder.getInstance()
                             .setClientIp(Inet4Address.getLocalHost().getHostAddress())
                             .setOsName(System.getProperty("os.name"))
-                            .setAppId(401595)
+                            .setAppId(DataRangersConstants.APP_ID)
                             .setUserUniqueId(Thread.currentThread().getName())
                             .build();
                     Map<String, Object> eventParams = new HashMap<>();
                     eventParams.put("current_time", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss")));
-                    eventParams.put("caller", taskScheduler.getClass().getName());
+                    eventParams.put("caller", taskScheduler.getClass().getSimpleName());
                     webEventCollector.sendEvent(header, "refresh_schedule_resolve", eventParams);
                 } catch (InterruptedException | UnknownHostException e) {
                     e.printStackTrace();
